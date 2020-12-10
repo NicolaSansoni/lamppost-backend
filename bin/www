@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// TODO: Decide how to run the function (lamppost.js).sendDataToServer() every 5 min asynchronously and implement it
+
 /**
  * Module dependencies.
  */
