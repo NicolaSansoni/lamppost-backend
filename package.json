@@ -4,12 +4,16 @@
   "private": true,
   "scripts": {
     "launch": "node ./bin/www",
-    "start": "SET DEBUG=lamppost-backend:* & npm run launch"
+    "start": "cross-env DEBUG=lamppost-backend:* npm run launch"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "express": "~4.16.1",
-    "morgan": "~1.9.1"
+    "morgan": "~1.9.1",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }

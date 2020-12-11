@@ -16,3 +16,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 
 module.exports = app;
+
+// Timed jobs
+const {sendDataToServer} = require('./engine/lamppost')
+const timerUpdateStatus = 5 * 60 * 1000
+const jobUpdateStatus = setInterval(sendDataToServer, timerUpdateStatus)

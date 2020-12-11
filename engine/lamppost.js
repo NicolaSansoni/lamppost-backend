@@ -1,20 +1,37 @@
-// TODO: Decide on what package to use to send requests
+const fetch = require('node-fetch')
+const debug = require('debug')('lamppost-backend:lamppost')
+
+const endpointUrl = 'http://localhost:3000/safePath/updateLamppostStatus'
 
 async function sendDataToServer() {
-    let [
-        id,
-        status,
-        videoUrl,
-        alert,
-    ] = await Promise.all([
-        getId(),
-        getStatus(),
-        getVideoUrl(),
-        getAlert()
-    ])
+    try {
+        let [
+            id,
+            status,
+            videoUrl,
+            alert,
+        ] = await Promise.all([
+            getId(),
+            getStatus(),
+            getVideoUrl(),
+            getAlert()
+        ])
 
-    // TODO: POST the data to http://localhost:8080/safePath/updateLamppostStatus
+        const res = await fetch(endpointUrl, {
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                id: id,
+                status: status,
+                videoUrl: videoUrl,
+                alert_type: alert,
+            })
+        })
 
+        debug("%O", res)
+    } catch (e) {
+        debug("%s", e)
+    }
 }
 
 async function getId() {
@@ -35,3 +52,5 @@ async function getAlert() {
     let alert = 'fakeAlert'
     return alert
 }
+
+module.exports = {sendDataToServer}
