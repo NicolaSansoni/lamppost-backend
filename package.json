@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "launch": "node ./bin/www",
-    "start": "cross-env DEBUG=lamppost-backend:* npm run launch"
+    "start": "cross-env DEBUG=llu:* npm run launch"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",

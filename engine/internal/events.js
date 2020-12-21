@@ -1,5 +1,5 @@
 const HttpStatus = require('http-status-codes')
-const debug = require('debug')('lamppost-backend:lamppost')
+const debug = require('debug')('llu: events')
 
 async function update (req, res) {
     debug("events.update called")

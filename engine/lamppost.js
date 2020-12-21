@@ -1,5 +1,5 @@
 const fetch = require('node-fetch')
-const debug = require('debug')('lamppost-backend:lamppost')
+const debug = require('debug')('llu:lamppost')
 
 const endpointUrl = 'http://localhost:3000/safePath/updateLamppostStatus'
 

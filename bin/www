@@ -5,7 +5,7 @@
  */
 
 const {app, appInternal} = require('../app')
-const debug = require('debug')('lamppost-backend:server')
+const debug = require('debug')('llu:server')
 const http = require('http')
 
 
