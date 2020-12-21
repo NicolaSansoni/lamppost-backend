@@ -8,6 +8,30 @@ const {app, appInternal} = require('../app')
 const debug = require('debug')('llu:server')
 const http = require('http')
 
+const port = normalizePort(process.env.PORT || '3000')
+const portInternal = normalizePort(process.env.PORT1 || '3001')
+
+const internalServer = createServer(appInternal, portInternal, 'localhost')
+const server = createServer(app, port)
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+function normalizePort(val) {
+  const port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
 
 function createServer(app, port, host=null) {
   /**
@@ -74,6 +98,3 @@ function createServer(app, port, host=null) {
     debug('Listening on ' + bind)
   }
 }
-
-const internalServer = createServer(appInternal, 3001, 'localhost')
-const server = createServer(app, 3000)
