@@ -19,12 +19,12 @@ const internalRouter = require('./routes/internal')
 
 const appInternal = express()
 
-app.use(logger('dev'))
-app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
-app.use(cookieParser())
+appInternal.use(logger('dev'))
+appInternal.use(express.json())
+appInternal.use(express.urlencoded({ extended: false }))
+appInternal.use(cookieParser())
 
-app.use('/', internalRouter)
+appInternal.use('/', internalRouter)
 
 /* Jobs */
 const jobs = {}
