@@ -1,11 +1,20 @@
 const {DataTypes, Model} = require('sequelize')
 const {sequelize} = require('/app')
 
-class Event extends Model {}
+const EventTypes = {
+    TERMINATED: 0,
+}
+
+class Event extends Model {
+    static get EventTypes() {
+        return EventTypes
+    }
+}
 
 Event.init({
     agentId: {
         type: DataTypes.BIGINT,
+        allowNull: false,
     },
     type: {
         type: DataTypes.BIGINT,
@@ -14,6 +23,11 @@ Event.init({
     videoFile: {
         type: DataTypes.STRING,
         unique: true,
+        defaultValue: null,
+    },
+    active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
     }
 }, {
     sequelize: sequelize,
@@ -22,4 +36,4 @@ Event.init({
 
 await Event.sync()
 
-module.exports = { Event }
+module.exports = Event
