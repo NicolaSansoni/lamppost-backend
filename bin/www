@@ -11,7 +11,9 @@ const http = require('http')
 const port = normalizePort(process.env.PORT || '3000')
 const portInternal = normalizePort(process.env.PORT1 || '3001')
 
+// noinspection JSUnusedLocalSymbols
 const internalServer = createServer(appInternal, portInternal, 'localhost')
+// noinspection JSUnusedLocalSymbols
 const server = createServer(app, port)
 
 /**
