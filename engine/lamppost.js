@@ -1,21 +1,29 @@
 const fetch = require('node-fetch')
 const debug = require('debug')('llu:lamppost')
+const Event = require('/models/event')
 
 const endpointUrl = 'http://localhost:3000/safePath/updateLamppostStatus'
 
 async function sendDataToServer() {
+
     try {
-        let [
-            id,
-            status,
-            videoUrl,
-            alert,
-        ] = await Promise.all([
-            getId(),
-            getStatus(),
-            getVideoUrl(),
-            getAlert()
-        ])
+
+        const list = await Event.findAll({
+            where: { active: true }
+        })
+
+        await Promise.all( list.map(sendEvent) )
+
+    } catch (e) {
+        debug("Error when sending data to server: \n %O", e)
+    }
+
+    async function sendEvent(event) {
+        const id = event.agentId
+        const status = event.type
+        // TODO: handle video URLs better
+        const videoUrl = event.videoFile
+        const alert = 'event'
 
         const res = await fetch(endpointUrl, {
             method: 'post',
@@ -28,29 +36,13 @@ async function sendDataToServer() {
             })
         })
 
-        debug("%O", res)
-    } catch (e) {
-        debug("%s", e)
+        if (
+            'status' in res && res.status >= 300
+            || 'statusCode' in res && res.statusCode >= 300
+        ) {
+            throw new Error(res)
+        }
     }
-}
-
-async function getId() {
-    let id = 1234
-    return id
-}
-
-async function getStatus() {
-    let status = 3
-    return status
-}
-async function getVideoUrl() {
-    let videoUrl = 'www.fakeUrl.com/fakeVideo'
-    return videoUrl
-}
-
-async function getAlert() {
-    let alert = 'fakeAlert'
-    return alert
 }
 
 module.exports = {sendDataToServer}
