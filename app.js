@@ -44,14 +44,15 @@ jobs.clearOldEvents = {
 
 /* Database */
 const {Sequelize} = require('sequelize')
-const sqlzOptions = require('config.json').sequelize
+const sqlzOptions = require('/config.json').sequelize
 
 const sequelize = new Sequelize(sqlzOptions)
 try {
     await sequelize.authenticate();
-    debug('Connection to the database has been established successfully.');
+    debug('Connection to the database has been established successfully.')
 } catch (error) {
-    debug('Unable to connect to the database: \n %O', error);
+    debug('Unable to connect to the database!')
+    throw error
 }
 
 module.exports = {app, appInternal, jobs, sequelize}

@@ -1,3 +1,5 @@
+'use strict'
+
 const fetch = require('node-fetch')
 const debug = require('debug')('llu:lamppost')
 const Event = require('/models/event')
