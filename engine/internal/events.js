@@ -7,8 +7,8 @@ const debug = require('debug')('llu: events')
 const Event = require('/models/event')
 const {Op} = require("sequelize");
 
-const rootDir = 'NODE_PATH' in process.env
-    ? process.env.NODE_PATH
+const rootDir = 'ROOT' in process.env
+    ? process.env.ROOT
     : path.dirname('../../app.js') // same as '../..' but is clearer about which dir we are choosing and why
 const videosDir = `${rootDir}/${require('config.json').videosDirectory}`
 
