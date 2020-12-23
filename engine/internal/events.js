@@ -1,16 +1,16 @@
 'use strict'
 
 const HttpStatus = require('http-status-codes')
-const fs = require('fs/promises')
+const fs = require('fs').promises
 const path = require('path')
 const debug = require('debug')('llu: events')
-const Event = require('/models/event')
 const {Op} = require("sequelize");
+const Event = require('../../models/event')
 
 const rootDir = 'ROOT' in process.env
     ? process.env.ROOT
-    : path.dirname('../../app.js') // same as '../..' but is clearer about which dir we are choosing and why
-const videosDir = `${rootDir}/${require('config.json').videosDirectory}`
+    : path.dirname('../../main.js') // same as '../..' but is clearer about which dir we are choosing and why
+const videosDir = `${rootDir}/${require('../../config.json').videosDirectory}`
 
 async function update (req, res, next) {
     debug("events.update called")
@@ -73,7 +73,7 @@ async function update (req, res, next) {
 }
 
 async function deleteOlds() {
-    const ttlStr = require('config.json').events.ttl
+    const ttlStr = require('../../config.json').events.ttl
 
     const hours = +ttlStr.match(/\d*(?=h)/) //"123h" => 123
     const minutes = hours * 60 + ttlStr.match(/\d+(?=m)/) //"123m" => 123
@@ -89,7 +89,7 @@ async function deleteOlds() {
             updatedAt: {
                 [Op.lt]: oldestAllowedTimestamp
             },
-            active: true
+            active: false
         }
     })
 

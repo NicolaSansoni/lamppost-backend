@@ -3,9 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "prestart": "cross-env NODE_PATH=.",
-    "start": "cross-env DEBUG=llu:* node ./bin/www",
-    "test": "npm run prestart & cross-env DEBUG=llu-test:* npx jest"
+    "set-env": "cross-env ROOT=.",
+    "launch": "node main.js",
+    "start": "cross-env DEBUG=llu:* npm run set-env npm run launch",
+    "test": "cross-env DEBUG=llu-test:* npm run set-env npx jest"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",

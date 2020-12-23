@@ -1,5 +1,5 @@
 const express = require('express')
-const Events = require("/engine/internal/events")
+const Events = require("../../engine/internal/events")
 const router = express.Router()
 
 /* GET home page. */
