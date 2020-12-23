@@ -1,0 +1,13 @@
+{
+  "sequelize": {
+    "username": "root",
+    "password": "",
+    "host": "localhost",
+    "database": "safespotter-llu",
+    "dialect": "mysql"
+  },
+  "videosDirectory": "media/videos",
+  "events": {
+    "ttl": "24h"
+  }
+}

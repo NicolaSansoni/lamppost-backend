@@ -1,10 +1,16 @@
 'use strict'
 
 const HttpStatus = require('http-status-codes')
-const fs = require('fs')
+const fs = require('fs/promises')
 const path = require('path')
 const debug = require('debug')('llu: events')
 const Event = require('/models/event')
+const {Op} = require("sequelize");
+
+const rootDir = 'NODE_PATH' in process.env
+    ? process.env.NODE_PATH
+    : path.dirname('../../app.js') // same as '../..' but is clearer about which dir we are choosing and why
+const videosDir = `${rootDir}/${require('config.json').videosDirectory}`
 
 async function update (req, res, next) {
     debug("events.update called")
@@ -27,17 +33,9 @@ async function update (req, res, next) {
             })
 
             // save the video file associated to this event
-            let rootDir = 'NODE_PATH' in process.env
-                ? process.env.NODE_PATH
-                : path.dirname('../../app.js') // same as '../..' but is clearer about which dir we are choosing and why
-            rootDir = path.normalize(rootDir)
-            const filePath = rootDir + '/media/videos/' + event.id
+            const filePath = `${videosDir}/${event.id}.mp4`
 
-            await new Promise((resolve, reject) => {
-                fs.writeFile(filePath, videoBlob, err => {
-                    if (err) reject(err) else resolve(filePath)
-                })
-            })
+            await fs.writeFile(filePath, videoBlob)
 
             // now that the file is created update the db entry to reference it
             event.videoFile = filePath
@@ -74,4 +72,36 @@ async function update (req, res, next) {
     }
 }
 
-module.exports = {update}
+async function deleteOlds() {
+    const ttlStr = require('config.json').events.ttl
+
+    const hours = +ttlStr.match(/\d*(?=h)/) //"123h" => 123
+    const minutes = hours * 60 + ttlStr.match(/\d+(?=m)/) //"123m" => 123
+    const seconds = minutes * 60 + ttlStr.match(/\d+(?=s)/) //"123s" => 123
+
+    const ttl = seconds * 1000 + ttlStr.match(/\d+$/) // "123s456" => 456
+
+    // get the list of entries to delete
+    const oldestAllowedTimestamp = Date.now() - ttl
+
+    const listOlds = await Event.findAll({
+        where: {
+            updatedAt: {
+                [Op.lt]: oldestAllowedTimestamp
+            },
+            active: true
+        }
+    })
+
+    // delete them all concurrently
+    await Promise.all(listOlds.map(async item => {
+        try {
+            const file = `${rootDir}/${item.videoFile}`
+            await fs.rm(file)
+            await item.destroy()
+        } catch (e) {
+            debug("Error when deleting old events: \n %O", e)
+        }
+    }))
+}
+module.exports = {update, deleteOlds}

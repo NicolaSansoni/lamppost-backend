@@ -30,13 +30,21 @@ appInternal.use('/', internalRouter)
 /* Jobs */
 const jobs = {}
 const {sendDataToServer} = require('./engine/lamppost')
+const Events = require('/engine/internal/events')
 
-const timerUpdateStatus = 5 * 60 * 1000
-jobs.updateStatus = setInterval(sendDataToServer, timerUpdateStatus)
+jobs.updateStatus = {
+    timer: 5 * 60 * 1000, // 5 minutes
+    job: setInterval(sendDataToServer, this.timer)
+}
+
+jobs.clearOldEvents = {
+    timer: 4 * 3600 * 1000, // 4 hours
+    job: setInterval(Events.deleteOlds, this.timer)
+}
 
 /* Database */
 const {Sequelize} = require('sequelize')
-const sqlzOptions = require('config/sequelize/config.json')
+const sqlzOptions = require('config.json').sequelize
 
 const sequelize = new Sequelize(sqlzOptions)
 try {
