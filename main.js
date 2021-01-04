@@ -17,6 +17,7 @@ async function main() {
     } catch(error) {
         debug('Unable to connect to the database! Retrying...')
 
+        // Maybe the database hasn't been created yet
         try {
             if (sqOptions.dialect === 'mysql') {
                 const mysql = require('mysql2/promise')
@@ -37,9 +38,11 @@ async function main() {
         }
     }
 
+    // add models and create the tables if they don't exist
     require('./models')(sequelize)
     await sequelize.sync()
 
+    // helper that creates the connection and checks that it is successful
     async function initSequelize(options) {
         const sequelize = new Sequelize(options)
         await sequelize.authenticate()
@@ -81,15 +84,13 @@ async function main() {
     const {sendDataToServer} = require('./engine/lamppost')
     const Events = require('./engine/internal/events')
 
-    let timer
-    timer = 5 * 60 * 1000 // 5 minutes
-    jobs.updateStatus = {
-        job: setInterval(sendDataToServer, timer)
-    }
+    jobs.updateStatus = createJob(sendDataToServer, 5 * 60 * 1000) // 5 minutes
+    jobs.clearOldEvents = createJob(Events.deleteOlds, 4 * 3600 * 1000) // 4 hours
 
-    timer = 4 * 3600 * 1000 // 4 hours
-    jobs.clearOldEvents = {
-        job: setInterval(Events.deleteOlds, timer)
+    // helper that fires the job on creation and then schedules it to be repeated on an interval
+    function createJob(handler, timer) {
+        setTimeout(handler)
+        return setInterval(handler, timer)
     }
 }
 
