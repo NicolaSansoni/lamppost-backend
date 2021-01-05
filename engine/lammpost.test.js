@@ -1,16 +1,21 @@
 'use strict'
 
-const lamppost = require('./lamppost')
-
 const db = require('../test_helpers/database')
 
 jest.mock('node-fetch')
 const fetch = require('node-fetch')
 
 jest.mock('../models/event')
-const Event = require('../models/event')
 
-beforeAll(async () => await db.get())
+// initialized in beforeAll since it requires the database to import the Model Event correctly
+let lamppost
+let Event
+
+beforeAll(async () => {
+    await db.get()
+    lamppost = require('./lamppost')
+    Event = require('../models/event')
+})
 afterAll(async () => await db.release())
 
 describe("lamppost.sendDataToServer", () => {

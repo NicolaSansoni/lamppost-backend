@@ -27,6 +27,8 @@ async function getInstance() {
         return instance
     }
 
+    debug("These tests require a database to be open and listening to work.")
+
     try {
         if (CREATE) {
             // raw database creation

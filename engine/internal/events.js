@@ -27,13 +27,13 @@ module.exports.update = async function (req, res, next) {
         if (eventType != Event.EventTypes.TERMINATED) {
 
             // create a db entry so that an ID is created
-            let event = Event.create({
+            let event = await Event.create({
                 agentId: agentId,
                 type: eventType
             })
 
             // save the video file associated to this event
-            const filePath = `${videosDir}/${event.id}.mp4`
+            const filePath = `${videosDir}/${event.id}`
 
             await fs.writeFile(filePath, videoBlob)
 
