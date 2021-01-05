@@ -12,7 +12,7 @@ const rootDir = 'ROOT' in process.env
     : path.dirname('../../main.js') // same as '../..' but is clearer about which dir we are choosing and why
 const videosDir = `${rootDir}/${require('../../config.json').videosDirectory}`
 
-async function update (req, res, next) {
+module.exports.update = async function (req, res, next) {
     debug("events.update called")
     try {
         const agentId = req.body.agentId
@@ -72,7 +72,7 @@ async function update (req, res, next) {
     }
 }
 
-async function deleteOlds() {
+module.exports.deleteOlds = async function () {
     const ttlStr = require('../../config.json').events.ttl
 
     const hours = +ttlStr.match(/\d*(?=h)/) //"123h" => 123
@@ -104,4 +104,3 @@ async function deleteOlds() {
         }
     }))
 }
-module.exports = {update, deleteOlds}

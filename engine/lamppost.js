@@ -4,9 +4,9 @@ const fetch = require('node-fetch')
 const debug = require('debug')('llu:lamppost')
 const Event = require('../models/event')
 
-const endpointUrl = 'http://localhost:3000/safePath/updateLamppostStatus'
+const endpointUrl = 'http://localhost:5000/safePath/updateLamppostStatus'
 
-async function sendDataToServer() {
+module.exports.sendDataToServer = async function () {
 
     try {
 
@@ -46,5 +46,3 @@ async function sendDataToServer() {
         }
     }
 }
-
-module.exports = {sendDataToServer}
