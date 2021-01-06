@@ -64,6 +64,8 @@ describe("events.update receives a proper request", () => {
     it("responds to a good request with OK", async () => {
         expect(res.statusCode).toBeGreaterThan(199)
         expect(res.statusCode).toBeLessThan(300)
+
+        expect(mockNext).not.toBeCalled()
     })
 
     it('writes the data to the filesystem', async () => {
@@ -92,7 +94,7 @@ describe("events.update receives a bad request", () => {
     beforeAll(async () => {
         jest.clearAllMocks()
         jest.spyOn(fs, 'writeFile').mockImplementation()
-        jest.spyOn(Event, 'create').mockImplementation()
+        jest.spyOn(Event, 'create')
     })
 
     afterAll(() => {
@@ -101,9 +103,47 @@ describe("events.update receives a bad request", () => {
     })
 
     //TODO
-    // it ('should refuse if the arguments are incorrect', async () => {})
-    // it ('should refuse if agentId is not a number', async () => {})
-    // it ('should refuse if eventType is not a number', async () => {})
+    it ('should refuse if the arguments are incorrect', async () => {
+        let req = {
+            body: {
+                id: faker.random.number(), //agentId
+                type: 1,                   //eventType
+                data: faker.random.image() //videoBlob
+            }
+        }
+        let res = new Response()
+        await events.update(req, res, mockNext)
+
+        expect(mockNext).toBeCalled()
+    })
+
+    it ('should refuse if agentId is not a number', async () => {
+        let req = {
+            body: {
+                agentId: faker.name.firstName(),
+                eventType: 1,
+                videoBlob: faker.random.image()
+            }
+        }
+        let res = new Response()
+        await events.update(req, res, mockNext)
+
+        expect(mockNext).toBeCalled()
+    })
+
+    it ('should refuse if eventType is not a number', async () => {
+        let req = {
+            body: {
+                agentId: faker.random.number(),
+                eventType: "crash",
+                videoBlob: faker.random.image()
+            }
+        }
+        let res = new Response()
+        await events.update(req, res, mockNext)
+
+        expect(mockNext).toBeCalled()
+    })
 })
 
 describe("events.deleteOlds", () => {
