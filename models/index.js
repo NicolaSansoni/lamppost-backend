@@ -9,5 +9,8 @@ module.exports = (sequelize) => {
         .filter(file => {
             return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js')
         })
-        .forEach(file => require(path.join(__dirname, file))(sequelize))
+        .forEach(file => {
+            let module = require(path.join(__dirname, file))
+            module.initialize(sequelize)
+        })
 }
