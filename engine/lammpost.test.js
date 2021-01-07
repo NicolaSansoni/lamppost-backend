@@ -38,7 +38,7 @@ describe("lamppost.sendDataToServer", () => {
                 Event.create({
                     agentId: faker.random.number(),
                     type: faker.random.number(),
-                    videoFile: faker.random.image()
+                    videoFile: faker.system.fileName()
                 })
             )
         }
@@ -80,7 +80,7 @@ describe("lamppost.sendDataToServer", () => {
                 Event.create({
                     agentId: faker.random.number(),
                     type: faker.random.number(),
-                    videoUrl: faker.random.image()
+                    videoFile: faker.system.fileName()
                 })
             )
         }
