@@ -2,7 +2,7 @@
 
 // quick settings
 const CREATE = true
-const DROP = true
+const DROP = false // dropping the db crashes the tests sometimes
 
 const {Sequelize} = require('sequelize')
 const mysql = require('mysql2/promise')
@@ -70,6 +70,8 @@ async function release() {
     uses--
 
     if (uses === 0) {
+
+        debug('Closing the connection to the database...')
 
         await instance.close()
         instance = null

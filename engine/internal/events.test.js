@@ -24,7 +24,10 @@ const mockNext = jest.fn()
  */
 
 beforeAll(async () => await db.get())
-afterAll(async () => await db.release())
+afterAll(async () => {
+    await Event.drop()
+    await db.release()
+})
 
 describe("events.update receives a proper request", () => {
 
@@ -42,6 +45,8 @@ describe("events.update receives a proper request", () => {
     let res = new Response()
 
     beforeAll( async () => {
+        await Event.sync({ force: true })
+
         jest.clearAllMocks()
         jest.spyOn(fs, 'writeFile').mockImplementation()
 
@@ -102,7 +107,8 @@ describe("events.update receives a bad request", () => {
         Event.create.mockRestore()
     })
 
-    //TODO
+    beforeEach( async () => await Event.sync({ force: true }) )
+
     it ('should refuse if the arguments are incorrect', async () => {
         let req = {
             body: {
@@ -114,7 +120,10 @@ describe("events.update receives a bad request", () => {
         let res = new Response()
         await events.update(req, res, mockNext)
 
+        let table = await Event.findAll()
+
         expect(mockNext).toBeCalled()
+        expect(table).toHaveLength(0)
     })
 
     it ('should refuse if agentId is not a number', async () => {
@@ -128,7 +137,10 @@ describe("events.update receives a bad request", () => {
         let res = new Response()
         await events.update(req, res, mockNext)
 
+        let table = await Event.findAll()
+
         expect(mockNext).toBeCalled()
+        expect(table).toHaveLength(0)
     })
 
     it ('should refuse if eventType is not a number', async () => {
@@ -142,7 +154,10 @@ describe("events.update receives a bad request", () => {
         let res = new Response()
         await events.update(req, res, mockNext)
 
+        let table = await Event.findAll()
+
         expect(mockNext).toBeCalled()
+        expect(table).toHaveLength(0)
     })
 })
 
