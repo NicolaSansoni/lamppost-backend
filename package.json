@@ -6,7 +6,7 @@
     "set-env": "cross-env ROOT=.",
     "launch": "node main.js",
     "start": "cross-env DEBUG=llu:* npm run set-env npm run launch",
-    "test": "cross-env DEBUG=llu-test:* npm run set-env npx jest"
+    "test": "cross-env DEBUG=llu-test:* npm run set-env npx jest -i"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",

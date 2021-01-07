@@ -24,10 +24,7 @@ const mockNext = jest.fn()
  */
 
 beforeAll(async () => await db.get())
-afterAll(async () => {
-    await Event.drop()
-    await db.release()
-})
+afterAll(async () => await db.release())
 
 describe("events.update receives a proper request", () => {
 
@@ -66,19 +63,21 @@ describe("events.update receives a proper request", () => {
         Event.create.mockRestore()
     })
 
-    it("responds to a good request with OK", async () => {
+    it("responds to a good request with OK", async (done) => {
         expect(res.statusCode).toBeGreaterThan(199)
         expect(res.statusCode).toBeLessThan(300)
 
         expect(mockNext).not.toBeCalled()
+        done()
     })
 
-    it('writes the data to the filesystem', async () => {
+    it('writes the data to the filesystem', async (done) => {
         expect(fs.writeFile).toHaveBeenCalled()
         expect(fs.writeFile.mock.calls[0][1]).toBe(req.body.videoBlob)
+        done()
     })
 
-    it('saves the data in the database', async () => {
+    it('saves the data in the database', async (done) => {
         expect(Event.create).toHaveBeenCalled()
 
         let document = await Event.create.mock.results[0].value
@@ -86,11 +85,13 @@ describe("events.update receives a proper request", () => {
         let data = await Event.findByPk(document.id)
         expect(data.agentId).toBe(req.body.agentId)
         expect(data.type).toBe(req.body.eventType)
+        done()
     })
 
-    it('sets old events as inactive', async () => {
+    it('sets old events as inactive', async (done) => {
         await oldEvent.reload()
         expect(oldEvent.active).toBeFalsy()
+        done()
     })
 })
 
@@ -111,7 +112,7 @@ describe("events.update receives a bad request", () => {
         await Event.sync({force: true})
     } )
 
-    it ('should refuse if the arguments are incorrect', async () => {
+    it ('should refuse if the arguments are incorrect', async (done) => {
         let req = {
             body: {
                 id: faker.random.number(), //agentId
@@ -126,9 +127,10 @@ describe("events.update receives a bad request", () => {
 
         expect(mockNext).toBeCalled()
         expect(table).toHaveLength(0)
+        done()
     })
 
-    it ('should refuse if agentId is not a number', async () => {
+    it ('should refuse if agentId is not a number', async (done) => {
         let req = {
             body: {
                 agentId: faker.name.firstName(),
@@ -143,9 +145,10 @@ describe("events.update receives a bad request", () => {
 
         expect(mockNext).toBeCalled()
         expect(table).toHaveLength(0)
+        done()
     })
 
-    it ('should refuse if eventType is not a number', async () => {
+    it ('should refuse if eventType is not a number', async (done) => {
         let req = {
             body: {
                 agentId: faker.random.number(),
@@ -160,6 +163,7 @@ describe("events.update receives a bad request", () => {
 
         expect(mockNext).toBeCalled()
         expect(table).toHaveLength(0)
+        done()
     })
 })
 
@@ -169,7 +173,7 @@ describe("events.deleteOlds", () => {
         await Event.sync({force: true})
     })
 
-    it("should delete old inactive events", async () => {
+    it("should delete old inactive events", async (done) => {
         let oldEvent = await Event.create({
             agentId: faker.random.number(),
             type: 1,
@@ -191,9 +195,10 @@ describe("events.deleteOlds", () => {
         let table = await Event.findAll()
 
         expect(table).toHaveLength(0)
+        done()
     })
 
-    it("should not delete active events, no matter how old", async () => {
+    it("should not delete active events, no matter how old", async (done) => {
         let oldEvent = await Event.create({
             agentId: faker.random.number(),
             type: 1,
@@ -215,5 +220,6 @@ describe("events.deleteOlds", () => {
         let table = await Event.findAll()
 
         expect(table).toHaveLength(1)
+        done()
     })
 })
