@@ -97,7 +97,15 @@ module.exports.deleteOlds = async function () {
     await Promise.all(listOlds.map(async item => {
         try {
             const file = `${rootDir}/${item.videoFile}`
-            await fs.rm(file)
+            try {
+                await fs.unlink(file)
+            } catch (e) {
+                // if the file doesn't exist continue anyway
+                if (e.code === "ENOENT")
+                    debug("File not found: %s", file)
+                else
+                    throw  e
+            }
             await item.destroy()
         } catch (e) {
             debug("Error when deleting old events: \n %O", e)

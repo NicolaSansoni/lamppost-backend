@@ -97,7 +97,6 @@ describe("events.update receives a proper request", () => {
 describe("events.update receives a bad request", () => {
 
     beforeAll(async () => {
-        jest.clearAllMocks()
         jest.spyOn(fs, 'writeFile').mockImplementation()
         jest.spyOn(Event, 'create')
     })
@@ -107,7 +106,10 @@ describe("events.update receives a bad request", () => {
         Event.create.mockRestore()
     })
 
-    beforeEach( async () => await Event.sync({ force: true }) )
+    beforeEach( async () => {
+        jest.clearAllMocks()
+        await Event.sync({force: true})
+    } )
 
     it ('should refuse if the arguments are incorrect', async () => {
         let req = {
@@ -162,5 +164,56 @@ describe("events.update receives a bad request", () => {
 })
 
 describe("events.deleteOlds", () => {
-    //TODO
+    beforeEach(async () => {
+        jest.clearAllMocks()
+        await Event.sync({force: true})
+    })
+
+    it("should delete old inactive events", async () => {
+        let oldEvent = await Event.create({
+            agentId: faker.random.number(),
+            type: 1,
+            active: false,
+        })
+
+        await Event.update({
+            createdAt: new Date(0), // time for some Disco music!
+            updatedAt: new Date(0), // feeling Funky!
+        }, {
+            where: {
+                id: oldEvent.id
+            },
+            silent: true //needed to stop the db from auto updating 'updatedAt'
+        })
+
+        await events.deleteOlds()
+
+        let table = await Event.findAll()
+
+        expect(table).toHaveLength(0)
+    })
+
+    it("should not delete active events, no matter how old", async () => {
+        let oldEvent = await Event.create({
+            agentId: faker.random.number(),
+            type: 1,
+            active: true,
+        })
+
+        await Event.update({
+            createdAt: new Date(0), // only 3 years for the best Pink Floyd's Album!
+            updatedAt: new Date(0), // and only 2 years for an offer he can't refuse!
+        }, {
+            where: {
+                id: oldEvent.id
+            },
+            silent: true //needed to stop the db from auto updating 'updatedAt'
+        })
+
+        await events.deleteOlds()
+
+        let table = await Event.findAll()
+
+        expect(table).toHaveLength(1)
+    })
 })
