@@ -4,10 +4,11 @@ const logger = require('morgan')
 const debug = require('debug')('llu:app')
 const {Sequelize} = require('sequelize')
 const {normalizePort, createServer} = require('./helpers/server')
+const config = require('./config.json')
 
 async function main() {
     /* Database */
-    const sqOptions = require('./config.json').sequelize
+    const sqOptions = config.sequelize
 
     let sequelize
     debug('Connecting to %s...', sqOptions.database)
@@ -84,8 +85,8 @@ async function main() {
     const {sendDataToServer} = require('./engine/lamppost')
     const Events = require('./engine/internal/events')
 
-    jobs.updateStatus = createJob(sendDataToServer, 5 * 60 * 1000) // 5 minutes
-    jobs.clearOldEvents = createJob(Events.deleteOlds, 4 * 3600 * 1000) // 4 hours
+    jobs.updateStatus = createJob(sendDataToServer, config.timers.updateStatus * 1000)
+    jobs.clearOldEvents = createJob(Events.deleteOlds, config.timers.clearOldEvents * 1000)
 
     // helper that fires the job on creation and then schedules it to be repeated on an interval
     function createJob(handler, timer) {
