@@ -1,15 +1,19 @@
 'use strict'
 
+//tested module
+const events = require('./events')
+
+//module dependencies
 const fs = require('fs').promises
+const Event = require('../../models/event')
+
+//test dependencies
 const faker = require('faker')
 const db = require('../../test_helpers/database')
-
 const Response = require('../../test_helpers/response')
 const mockNext = jest.fn()
 
-// initialized in beforeAll since it requires the database to import the Model Event correctly
-let events
-let Event
+
 
 /*
  * If you want proper unit tests remove the initialization of the db and mock Event,
@@ -19,11 +23,7 @@ let Event
  * Also checking if the old events get terminated might be hard.
  */
 
-beforeAll(async () => {
-    await db.get()
-    events = require('./events')
-    Event = require('../../models/event')
-})
+beforeAll(async () => await db.get())
 afterAll(async () => await db.release())
 
 describe("events.update receives a proper request", () => {

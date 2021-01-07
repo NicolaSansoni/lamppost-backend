@@ -38,7 +38,7 @@ async function main() {
         }
     }
 
-    // add models and create the tables if they don't exist
+    // link models to the database and create the tables if they don't exist
     require('./models')(sequelize)
     await sequelize.sync()
 
