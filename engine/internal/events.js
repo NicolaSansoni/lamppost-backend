@@ -35,7 +35,7 @@ module.exports.update = async function (req, res, next) {
             // save the video file associated to this event
             const filePath = `${videosDir}/${event.id}`
 
-            await fs.writeFile(filePath, videoBlob)
+            await fs.writeFile(filePath, Buffer.from(videoBlob))
 
             // now that the file is created update the db entry to reference it
             event.videoFile = filePath

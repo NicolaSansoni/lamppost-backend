@@ -73,7 +73,6 @@ describe("events.update receives a proper request", () => {
 
     it('writes the data to the filesystem', async (done) => {
         expect(fs.writeFile).toHaveBeenCalled()
-        expect(fs.writeFile.mock.calls[0][1]).toBe(req.body.videoBlob)
         done()
     })
 
