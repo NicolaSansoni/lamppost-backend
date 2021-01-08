@@ -5,6 +5,7 @@ const debug = require('debug')('llu:app')
 const {Sequelize} = require('sequelize')
 const {normalizePort, createServer} = require('./helpers/server')
 const config = require('./config/config.json')
+const fs = require('fs').promises
 
 async function main() {
     /* Database */
@@ -50,6 +51,16 @@ async function main() {
         return sequelize
     }
 
+    /* Create the media directory */
+    const videoDir = config.videosDirectory
+    try {
+        await fs.mkdir(videoDir)
+    } catch (e) {
+        // if the directory exists already we dont care, otherwise throw
+        if (e.code !== 'EEXIST')
+            throw e
+    }
+
     /* Configuration of the server that communicates with the TCU */
     let router = require('./routes')
     const port = normalizePort(process.env.PORT || '3000')
@@ -72,13 +83,13 @@ async function main() {
     const appInternal = express()
 
     appInternal.use(logger('dev'))
-    appInternal.use(express.json())
+    appInternal.use(express.json({limit: '50mb'}))
     appInternal.use(express.urlencoded({extended: false}))
     appInternal.use(cookieParser())
 
     appInternal.use('/', routerInternal)
 
-    createServer(appInternal, portInternal, 'localhost')
+    createServer(appInternal, portInternal)
 
     /* Jobs */
     const jobs = {}
