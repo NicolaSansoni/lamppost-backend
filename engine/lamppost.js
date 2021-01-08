@@ -3,7 +3,7 @@
 const fetch = require('node-fetch')
 const debug = require('debug')('llu:lamppost')
 const Event = require('../models/event')
-const config = require('../config.json')
+const config = require('../config/config.json')
 
 const endpointUrl = `http://${config.endpoint.host}:${config.endpoint.port}/safePath/updateLamppostStatus`
 

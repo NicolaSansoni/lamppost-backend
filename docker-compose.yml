@@ -1,0 +1,30 @@
+services:
+  db:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - mysql:/var/lib/mysql
+    expose:
+      - "3306"
+    command: --default-authentication-plugin=mysql_native_password
+
+  llu:
+    image: nsanso/safespotter-llu
+    container_name: llu
+    volumes:
+      - llu-config:/build/config
+      - llu-media:/build/media
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    depends_on:
+      - db
+    links:
+      - db
+
+volumes:
+  mysql:
+  llu-config:
+  llu-media:

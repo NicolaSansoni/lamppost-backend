@@ -8,7 +8,7 @@ const {Sequelize} = require('sequelize')
 const mysql = require('mysql2/promise')
 const debug = require('debug')('llu-test:')
 
-let options = require('../config.json').sequelize
+let options = require('../config/config.json').sequelize
 options.database = options.database.concat('__test__' + process.pid)
 
 let instance = null

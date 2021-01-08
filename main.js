@@ -4,7 +4,7 @@ const logger = require('morgan')
 const debug = require('debug')('llu:app')
 const {Sequelize} = require('sequelize')
 const {normalizePort, createServer} = require('./helpers/server')
-const config = require('./config.json')
+const config = require('./config/config.json')
 
 async function main() {
     /* Database */

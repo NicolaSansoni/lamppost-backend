@@ -10,7 +10,7 @@ const Event = require('../../models/event')
 const rootDir = 'ROOT' in process.env
     ? process.env.ROOT
     : path.dirname('../../main.js') // same as '../..' but is clearer about which dir we are choosing and why
-const videosDir = `${rootDir}/${require('../../config.json').videosDirectory}`
+const videosDir = `${rootDir}/${require('../../config/config.json').videosDirectory}`
 
 module.exports.update = async function (req, res, next) {
     debug("events.update called")
@@ -73,7 +73,7 @@ module.exports.update = async function (req, res, next) {
 }
 
 module.exports.deleteOlds = async function () {
-    const ttlStr = require('../../config.json').events.ttl
+    const ttlStr = require('../../config/config.json').events.ttl
 
     const hours = +ttlStr.match(/\d*(?=h)/) //"123h" => 123
     const minutes = hours * 60 + ttlStr.match(/\d+(?=m)/) //"123m" => 123
@@ -104,7 +104,9 @@ module.exports.deleteOlds = async function () {
                 if (e.code === "ENOENT")
                     debug("File not found: %s", file)
                 else
-                    throw  e
+                    { // noinspection ExceptionCaughtLocallyJS
+                        throw  e
+                    }
             }
             await item.destroy()
         } catch (e) {

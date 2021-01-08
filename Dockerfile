@@ -8,6 +8,8 @@ RUN npm install
 
 COPY . .
 
+COPY ./docker .
+
 ENV PORT=3000 PORT1=3001
 
 EXPOSE 3000 3001
