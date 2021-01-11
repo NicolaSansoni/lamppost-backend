@@ -33,12 +33,12 @@ module.exports.update = async function (req, res, next) {
             })
 
             // save the video file associated to this event
-            const filePath = `${videosDir}/${event.id}`
+            const fileId = `${event.id}`
 
-            await fs.writeFile(filePath, Buffer.from(videoBlob))
+            await fs.writeFile(`${videosDir}/${fileId}`, Buffer.from(videoBlob))
 
             // now that the file is created update the db entry to reference it
-            event.videoFile = filePath
+            event.videoFile = fileId
             await event.save()
         }
 
@@ -96,7 +96,7 @@ module.exports.deleteOlds = async function () {
     // delete them all concurrently
     await Promise.all(listOlds.map(async item => {
         try {
-            const file = `${rootDir}/${item.videoFile}`
+            const file = `${videosDir}/${item.videoFile}`
             try {
                 await fs.unlink(file)
             } catch (e) {

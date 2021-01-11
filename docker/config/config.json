@@ -7,7 +7,7 @@
     "dialect": "mysql",
     "logging": false
   },
-  "videosDirectory": "media/videos",
+  "videosDirectory": "media",
   "events": {
     "ttl": "24h"
   },
