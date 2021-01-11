@@ -1,0 +1,22 @@
+{
+  "sequelize": {
+    "username": "root",
+    "password": "",
+    "host": "localhost",
+    "database": "safespotter-llu__test__",
+    "dialect": "mysql",
+    "logging": false
+  },
+  "videosDirectory": "media__test__",
+  "events": {
+    "ttl": "24h"
+  },
+  "timers": {
+    "updateStatus": 300,
+    "clearOldEvents": 3600
+  },
+  "endpoint": {
+    "host": "localhost",
+    "port": 5000
+  }
+}

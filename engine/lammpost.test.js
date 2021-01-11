@@ -7,9 +7,12 @@ const lamppost = require('./lamppost')
 const Event = require('../models/event')
 jest.mock('node-fetch')
 const fetch = require('node-fetch')
+const configMock = require('../test_helpers/config.json')
+jest.mock('../config/config.json', () => configMock, {virtual: true})
 
 //test dependencies
 const db = require('../test_helpers/database')
+const Response = require('../test_helpers/response')
 const faker = require('faker')
 
 beforeAll(async () => await db.get())
@@ -92,5 +95,65 @@ describe("lamppost.sendDataToServer", () => {
         expect(lamppost.sendDataToServer).not.toThrow()
 
         done()
+    })
+})
+
+describe('lamppost.requestMedia', () => {
+
+    const fs = require('fs').promises
+    const path = require('path')
+    const rootDir = 'ROOT' in process.env
+        ? process.env.ROOT
+        : path.dirname('../main.js') // same as '..' but is clearer about which dir we are choosing and why
+    const videosDir = `${rootDir}/${configMock.videosDirectory}`
+
+    const mockNext = jest.fn()
+
+    beforeAll(async () => {
+        //create media dir
+        try {
+            await fs.mkdir(videosDir)
+        } catch (e) {
+            // if the directory exists already we dont care, otherwise throw
+            if (e.code !== 'EEXIST')
+                throw e
+        }
+    })
+    afterAll( async () => {
+        //delete media dir
+        await fs.rmdir(videosDir)
+    })
+
+    beforeEach(async () => {
+        jest.clearAllMocks()
+        await Event.sync({force: true})
+    })
+    afterEach( async () => {
+        //clear media dir
+        let files = await fs.readdir(videosDir)
+        for (const file of files) {
+            const filePath = path.join(videosDir, file)
+            await fs.unlink(filePath)
+        }
+    })
+
+    it("should return the data", async () => {
+        let file = faker.random.alphaNumeric()
+        let event = await Event.create({
+            agentId: faker.random.number(),
+            type: 1,
+            videoFile: file
+        })
+
+        let mediaBuffer = await fs.readFile("../test_helpers/a.png")
+        await fs.writeFile(`${videosDir}/${file}`, mediaBuffer)
+
+        let res = new Response()
+
+        await lamppost.requestMedia({params: file}, res, mockNext)
+
+        expect(mockNext).not.toBeCalled()
+        expect(res.statusCode).toBeLessThan(300)
+        expect(res.data).toEqual(mediaBuffer)
     })
 })
