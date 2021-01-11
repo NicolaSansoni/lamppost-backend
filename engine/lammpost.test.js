@@ -8,7 +8,6 @@ const Event = require('../models/event')
 jest.mock('node-fetch')
 const fetch = require('node-fetch')
 const configMock = require('../test_helpers/config.json')
-jest.mock('../config/config.json', () => configMock, {virtual: true})
 
 //test dependencies
 const db = require('../test_helpers/database')
@@ -139,18 +138,18 @@ describe('lamppost.requestMedia', () => {
 
     it("should return the data", async () => {
         let file = faker.random.alphaNumeric()
-        let event = await Event.create({
+        await Event.create({
             agentId: faker.random.number(),
             type: 1,
             videoFile: file
         })
 
-        let mediaBuffer = await fs.readFile("../test_helpers/a.png")
+        let mediaBuffer = await fs.readFile("test_helpers/a.png") // I dont get why this gets fired from root but everything seems to work
         await fs.writeFile(`${videosDir}/${file}`, mediaBuffer)
 
         let res = new Response()
 
-        await lamppost.requestMedia({params: file}, res, mockNext)
+        await lamppost.requestMedia({params: {file: file}}, res, mockNext)
 
         expect(mockNext).not.toBeCalled()
         expect(res.statusCode).toBeLessThan(300)
