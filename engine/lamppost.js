@@ -15,48 +15,45 @@ const rootDir = 'ROOT' in process.env
     : path.dirname('../main.js') // same as '..' but is clearer about which dir we are choosing and why
 const videosDir = `${rootDir}/${require('../config/config.json').videosDirectory}`
 
-module.exports.sendDataToServer = async function () {
+async function sendEvent(event) {
+    const id = 1 //TODO: get it from somewhere else
+    const alertId = event.type
+    const videoUrl = event.videoFile
+
+    const res = await fetch(endpointUrl, {
+        method: 'post',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            lamp_id: id,
+            alert_id: alertId,
+            // videoURL: videoUrl,
+        })
+    })
+
+    if (
+        'status' in res && res.status >= 300
+        || 'statusCode' in res && res.statusCode >= 300
+    ) {
+        throw new Error(res)
+    }
+}
+
+async function sendDataToServer() {
 
     try {
 
-        const list = await Event.findAll({
-            where: { active: true }
-        })
+        const list = await Event.findAll({})
 
         await Promise.all( list.map(sendEvent) )
 
     } catch (e) {
         debug("Error when sending data to server: \n %O", e)
     }
-
-    async function sendEvent(event) {
-        const id = event.agentId
-        const status = event.type
-        // TODO: handle video URLs better
-        const videoUrl = event.videoFile
-        const alert = 'event'
-
-        const res = await fetch(endpointUrl, {
-            method: 'post',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                id: id,
-                status: status,
-                videoUrl: videoUrl,
-                alert_type: alert,
-            })
-        })
-
-        if (
-            'status' in res && res.status >= 300
-            || 'statusCode' in res && res.statusCode >= 300
-        ) {
-            throw new Error(res)
-        }
-    }
 }
 
-module.exports.requestMedia = async function (req, res, next) {
+
+
+async function requestMedia(req, res, next) {
     debug("lamppost.requestMedia called")
     let fileId = req.params.file
     const file = `${videosDir}/${fileId}`
@@ -68,3 +65,5 @@ module.exports.requestMedia = async function (req, res, next) {
         next(e)
     }
 }
+
+module.exports = {sendEvent, sendDataToServer, requestMedia}

@@ -11,22 +11,13 @@ class Event extends Model {
 
     static initialize(sequelize) {
         Event.init({
-            agentId: {
-                type: DataTypes.BIGINT,
-                allowNull: false,
-            },
             type: {
                 type: DataTypes.BIGINT,
                 allowNull: false,
             },
             videoFile: {
                 type: DataTypes.STRING,
-                unique: true,
                 defaultValue: null,
-            },
-            active: {
-                type: DataTypes.BOOLEAN,
-                defaultValue: true,
             }
         }, {
             sequelize,

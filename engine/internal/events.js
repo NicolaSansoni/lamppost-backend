@@ -6,6 +6,7 @@ const path = require('path')
 const debug = require('debug')('llu: events')
 const {Op} = require("sequelize");
 const Event = require('../../models/event')
+const lamppost = require('../lamppost')
 
 const rootDir = 'ROOT' in process.env
     ? process.env.ROOT
@@ -14,33 +15,18 @@ const videosDir = `${rootDir}/${require('../../config/config.json').videosDirect
 
 module.exports.update = async function (req, res, next) {
     debug("events.update called")
+    let event = null
     try {
-        const agentId = req.body.agentId
         const eventType = req.body.eventType
-        const videoBlob = req.body.videoBlob
+        const videoFile = req.body.videoFile
 
-        // we have a new event for this agent, so the old ones have now ended
-        await terminateEvents(agentId)
+        // create a db entry so that an ID is created
+        event = await Event.create({
+            type: eventTypeStrToInt(eventType),
+            videoFile: videoFile
+        })
 
-        // if the request is to terminate the event associated with this agent we don't have to create a new one
-        // noinspection EqualityComparisonWithCoercionJS
-        if (eventType != Event.EventTypes.TERMINATED) {
-
-            // create a db entry so that an ID is created
-            let event = await Event.create({
-                agentId: agentId,
-                type: eventType
-            })
-
-            // save the video file associated to this event
-            const fileId = `${event.id}`
-
-            await fs.writeFile(`${videosDir}/${fileId}`, Buffer.from(videoBlob))
-
-            // now that the file is created update the db entry to reference it
-            event.videoFile = fileId
-            await event.save()
-        }
+        await event.save();
 
         res.status(HttpStatus.OK).send('event update successful')
 
@@ -49,26 +35,32 @@ module.exports.update = async function (req, res, next) {
         debug("%O", e)
         next(e)
     }
+    if (event) {
+        try {
+            await lamppost.sendEvent(event)
+        } catch (e) {
+            debug("Error when sending data to server: \n %O", e)
+        }
+    }
 
-    async function terminateEvents(agent) {
 
-        // This should only ever find one active event but in case something
-        // weird was to happen this would fix the state of the events
-
-        const list = await Event.findAll({
-            where: {
-                agentId: agent,
-                active: true,
-            }
-        })
-
-        await Promise.all(
-            list.map( async item => {
-                item.active = false
-                await item.save()
-                return item
-            })
-        )
+    function eventTypeStrToInt(eventTypeStr) {
+        switch (eventTypeStr) {
+            case "illegalcross":
+                return 1
+            case "congestion":
+                return 2
+            case "onroad":
+                return 3
+            case "invasion":
+                return 4
+            case "accident":
+                return 5
+            case "nopark":
+                return 6
+            default:
+                throw EvalError(`event type not recognised: ${eventTypeStr}`)
+        }
     }
 }
 
@@ -88,15 +80,14 @@ module.exports.deleteOlds = async function () {
         where: {
             updatedAt: {
                 [Op.lt]: oldestAllowedTimestamp
-            },
-            active: false
+            }
         }
     })
 
     // delete them all concurrently
     await Promise.all(listOlds.map(async item => {
         try {
-            const file = `${videosDir}/${item.videoFile}`
+            const file = item.videoFile
             try {
                 await fs.unlink(file)
             } catch (e) {
@@ -108,7 +99,8 @@ module.exports.deleteOlds = async function () {
                         throw  e
                     }
             }
-            await item.destroy()
+            item.videoFile = null
+            await item.save()
         } catch (e) {
             debug("Error when deleting old events: \n %O", e)
         }
